@@ -1,8 +1,9 @@
 # Med_Ass_Chamber_Parsers_For_Greg
 
-The code 'stopsigparser' is a script written to run along with the .bat file to parse stop signaling programs created by Gregory Simandl (Marquette University).
+**The code 'stopsigparser' is a script written to run along with the .bat file to parse stop signaling programs created by Gregory Simandl (Marquette University).**
 
-**How to use the code:**
+**HOW TO USE THE CODE:**
+
     1) Download the .py, .bat, and 'Group Identifier.xlsx'
     
     2) Put all three files in the same root folder (ex. 'C:\\Users\\JoeSchmo\\Desktop\\Stop Signal')
