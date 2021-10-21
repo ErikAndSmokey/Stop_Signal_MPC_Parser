@@ -6,11 +6,23 @@ from itertools import chain
 from datetime import date
 import numpy as np
 
+#get the current working directory
+file_path = os.getcwd()
 
-main_file_branch = 'ENTER YOUR FILE PATH HERE! Ex --> C:\\Users\\JoeSchmo\\Desktop\\StopSignal'
+
+#Grab group identifiers AND grab acceptable msn names
+dfgroups = pd.ExcelFile(file_path+'\\Group Identifier.xlsx').parse() #FILE PATH!
+control_name = dfgroups.keys()[0] #Handles group ID name changes
+experimental_name = dfgroups.keys()[1] #Handles group ID name changes
+listofcontrols = [str(i).upper() for i in dfgroups[control_name]] #Because df to df comparisons weren't working...
+listofexps = [str(i).upper() for i in dfgroups[experimental_name]] #Because df to df comparisons weren't working...
+accepted_msns = [str(i).upper().replace(' ','') for i in dfgroups['Acceptable MSNs']]
+accepted_msns.pop()
+
+
 
 #The directory where the data files are that you want to analyze
-path_to_data = main_file_branch + '\\Data\\'
+path_to_data = file_path +'\\Data\\'
 
 
 #These functions work for all file types... note the "specific" functions below
@@ -114,31 +126,24 @@ go_trial_q2 = []
 go_trial_q3 = []
 go_correct = []
 
-#Grab group identifiers AND grab acceptable msn names
-dfgroups = pd.ExcelFile(main_file_branch+'\\Group Identifier.xlsx').parse() #FILE PATH!
-control_name = dfgroups.keys()[0] #Handles group ID name changes
-experimental_name = dfgroups.keys()[1] #Handles group ID name changes
-listofcontrols = [str(i).upper() for i in dfgroups[control_name]] #Because df to df comparisons weren't working...
-listofexps = [str(i).upper() for i in dfgroups[experimental_name]] #Because df to df comparisons weren't working...
-accepted_msns = [str(i).upper() for i in dfgroups['Acceptable MSNs']]
-accepted_msns.pop()
+
 
 
 #Main loop --> operates outside of def main() so it runs without instantiating python --> stopsigparser.main()
 for i in os.listdir(path_to_data):
     file = path_to_data + i
     msn_check = MainInfoParser.msngrabber(file)
-    if msn_check.upper() in accepted_msns:
+    if msn_check.upper().replace(' ','') in accepted_msns:
         main_info = MainInfoParser(file,dates,starttimes,subjects,msns,paradigms)
         main_info.maininfograbber()
         delay_lengths_pre = []
         find_delays = ArrayParser(file, delay_lengths_pre, 'T','V')
         find_delays.arraygrabber()
-        delay_lengths_pre = [float(x) for i,x in enumerate(delay_lengths_pre[-1]) if i != 0 and float(x) > 0.0]
+        delay_lengths_pre = [float(x) for i,x in enumerate(delay_lengths_pre[-1]) if i != 0 and float(x) > 0.0] #fix if greg fixes program
         stop_latencies = []
         find_stop_lat = ArrayParser(file, stop_latencies, 'Z', 'NONE')
         find_stop_lat.endarraygrabber()
-        stop_latencies = [float(x) for i,x in enumerate(stop_latencies[-1][1:len(delay_lengths_pre)+1])]
+        stop_latencies = [float(x) for i,x in enumerate(stop_latencies[-1][1:len(delay_lengths_pre)+1])] #fix if greg fixes program
         if stop_latencies.count(0.0) == 0:
             stop_correct.append(0)
         else:
@@ -150,7 +155,7 @@ for i in os.listdir(path_to_data):
         go_trials = []
         find_gos = ArrayParser(file, go_trials, 'X','Z')
         find_gos.arraygrabber()
-        go_trials =[float(i) for i in go_trials[-1][1:total_go_trials+1]]
+        go_trials =[float(i) for i in go_trials[-1][1:total_go_trials+1]] #Fix if greg fixes program
         go_trial_latencies.append(sum(go_trials)/len(go_trials))
         go_trial_q1.append(np.percentile(go_trials,25))
         go_trial_q2.append(np.percentile(go_trials,50))
@@ -209,7 +214,7 @@ df.set_index('Subject', inplace=True)
 
 
 #Create a file save path and save a sheet/animal in a workbook for easy data visualization
-data_save = main_file_branch+f'\\XL Files\\Stop Signal Data from {date.today()}.xlsx'
+data_save = file_path + f'\\XL Files\\Stop Signal Data from {date.today()}.xlsx'
 with pd.ExcelWriter(data_save) as writer:
     for i,x in df.groupby('Subject'):
         x.to_excel(writer, sheet_name = i)
