@@ -1,1 +1,0 @@
-python stopsigparser.py
