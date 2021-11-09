@@ -4,42 +4,21 @@
 
 **HOW TO USE THE CODE:**
 
-    1) Download the .py, .bat, and 'Group Identifier.xlsx'
+    1) Download the .py files, .bat files, and 'Group Identifier.xlsx'
     
     2) Put all three files in the same root folder (ex. 'C:\\Users\\JoeSchmo\\Desktop\\Stop Signal')
     
-    3) Within the root folder, two folders need to be added with the following names:
-      a) 'Data'
-      
-      b) 'XL Files'
-      
-    4) The overall file structure should look like this:
+    3) Run the .bat file ('Make Folders') by double-clicking. This will create the folders in the directory that are necessary for the program.
+       
+    4) You will be required to add your own subjects (and their group names!) to the 'Group Identifier.xlsx' spreadsheet. Add those before running any of the other .bat files. In particular, you will need to add to the 'list of acceptable MSN's' column of the spreadsheet in order for the program to recognize all the file types for analysis. Copying and pasting directly directly from the MedPC data file is typically sufficient for this process.
     
-      a) 'Main' (Or whatever you want to call this one)
-      
-          |
-          
-          --> stopsigparser.py
-          
-          --> launchparser.bat
-          
-          --> Group Identifier.xlsx
-          
-          --> 'Data' (FOLDER)
-          
-                |
-                
-                --> ALL THE MPC DATA FILES YOU WANT TO PARSE GO HERE!
-                
-          --> 'XL FILES' (FOLDER)
-          
-                |
-                
-                --> WHERE THE EXCEL FILE WITH THE PARSED DATA WILL BE SAVED! YOU CAN FIND YOUR COMPILED DATA HERE!
-                
-    5) You will be required to add your own subjects (and their group names!) to the 'Group Identifier.xlsx' spreadsheet.
+    5) Add the data to be analyzed to the 'Data' folder that you made. This is the folder where it knows to look for files.
     
-    6) You will also be required to add your program names to the 'Group Identifier.xlsx' spreadsheet. The program names are what MedPC calls 'msns'. Copying and pasting directly        directly from the MedPC data file is typically sufficient for this process.
+    6) Once all this is setup, the stopsigparser.py script can be run by double-clicking the 'Collect Data Only.bat' file (if you only want the spreadsheet of data) or the 'Graphs and Data.bat' file (if you want the graphs* and spreadsheet). A file should be saved in your 'XL Files' folder everytime, and graphs saved to the 'Figures' folder if you choose to have the graphs made.
     
-    7) Once all this is setup, the stopsigparser.py script can be run by double-clicking the launchparser.bat file. A file should be saved in your 'XL Files' folder located in the same root folder as the .py and .bat scripts.
+    7) That's it! Do not forget to update your spreadsheet as you add programs or as you add animals to your study!
+    
+    
+    Notes:
+    *Graphing other data type is still in dev as the root MPC program is still in dev. We will complete the graphing utility as it become possible.
           
