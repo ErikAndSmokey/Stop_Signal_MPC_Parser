@@ -1,1 +1,1 @@
-make Data Figures "XL Files"
+mkdir Data Figures "XL Files"
