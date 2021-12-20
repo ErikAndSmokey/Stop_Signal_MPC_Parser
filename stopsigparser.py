@@ -664,3 +664,16 @@ class SS_Breakdown():
             
             #Send the dfs to the spreadsheet that was already made
             self.send_it()
+
+
+def get_data_only():
+    Parse()
+    SS_Breakdown()
+    
+
+def graphs_and_data():
+    parse_obj = Parse()
+    parse_obj
+    SS_Breakdown()
+    parse_obj.gr_rxns()
+    parse_obj.gr_go()
