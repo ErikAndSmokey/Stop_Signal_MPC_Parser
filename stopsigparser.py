@@ -477,6 +477,7 @@ class SS_Breakdown():
             self.correct_gos = []
             self.gts = []
             self.get_ssrt = []
+            self.final_ssrt = []
             
             
             
@@ -576,7 +577,7 @@ class SS_Breakdown():
                         temp_gts = []
                         get_gts = ArrayParser(self.file, temp_gts, 'X', 'Z')
                         get_gts.arraygrabber()
-                        self.gts.append([float(i) for i in temp_gts[-1][1:self.correct_gos[-1]+1]])
+                        self.gts.append([float(i)/.6 for i in temp_gts[-1][1:self.correct_gos[-1]+1]])
                         self.gts[-1].sort()
                         
                         self.magic_go = int(np.round(self.correct_gos[-1]*self.stop_incorrect_prob[-1]))
@@ -584,8 +585,24 @@ class SS_Breakdown():
                             self.get_ssrt.append(self.gts[-1][0])
                         else:
                             self.get_ssrt.append(self.gts[-1][self.magic_go-1])
-            
-            
+                            
+                        
+                        temp_i = []
+                        get_i = ArrayParser(self.file, temp_i, 'I','J')
+                        get_i.arraygrabber()
+                        get_i = float(temp_i[-1][0])/1000
+                        
+                        temp_l = []
+                        get_l = ArrayParser(self.file, temp_l, 'L','M')
+                        get_l.arraygrabber()
+                        get_l = float(temp_l[-1][0])/1000
+                        if get_l == get_i:
+                            get_i = 0.0
+    
+                        
+                        self.final_ssrt.append(self.get_ssrt[-1]-get_i)
+                        
+                        
             ####THIS CREATES JUST ENOUGH COLUMNS FOR EACH ANIMAL#######
             self.unsx_column = []
             for i in self.all_unsx_delay_count:
@@ -604,12 +621,13 @@ class SS_Breakdown():
             dfm = {'Subject': self.subjects,
                   'Date': self.dates,
                   'MSN': self.msns,
-                  'Total Go Trials': self.num_go_trials,
+                  'Total CORRECT Go Trials': self.correct_gos,
                   'Stop incorrect prob': self.stop_incorrect_prob,
-                  'Pre-Delay SSRT':self.get_ssrt}
+                  'SSRT':self.final_ssrt}
             
             self.df =  pd.DataFrame(dfm)
-            self.df['Go RXN Time of interest'] = self.df['Total Go Trials']*self.df['Stop incorrect prob']
+            self.df['Go RXN Time of interest'] = np.round(self.df['Total CORRECT Go Trials']*self.df['Stop incorrect prob'])
+            self.df['Go RXN Time of interest'] = [int(i) for i in self.df['Go RXN Time of interest']]
             
             for i in self.unsx_column:
                 self.df[f'Unsx stop @ {i}'] = [x[i] if i in x else np.nan for x in self.all_unsx_delay_count]
@@ -646,18 +664,3 @@ class SS_Breakdown():
             
             #Send the dfs to the spreadsheet that was already made
             self.send_it()
-
-            
-            
-            
-            
-def get_data_only():
-    get_data = Parse()
-    get_ss_breakdown = SS_Breakdown()
-    
-
-def graphs_and_data():
-    get_data = Parse()
-    get_ss_breakdown = SS_Breakdown()
-    get_data.gr_rxns()
-    get_data.gr_go()
