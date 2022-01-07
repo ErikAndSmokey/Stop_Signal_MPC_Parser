@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from collections import Counter
 from openpyxl import load_workbook
+from scipy import stats
 
 
 
@@ -127,6 +128,8 @@ class Parse():
         self.stop_incorrect = []
         self.stop_incorrect_percent = []
         self.go_trial_latencies = []
+        self.go_stdev = []
+        self.go_sterr = []
         self.go_trial_q1 = []
         self.go_trial_q2 = []
         self.go_trial_q3 = []
@@ -245,10 +248,27 @@ class Parse():
                 find_gos.arraygrabber()
                 go_trials =[float(i) for i in go_trials[-1][1:correct_gos+1]] #Fix if greg fixes program
                 self.all_go_latencies.append(go_trials)
-                self.go_trial_latencies.append(sum(go_trials)/len(go_trials))
-                self.go_trial_q1.append(np.percentile(go_trials,25))
-                self.go_trial_q2.append(np.percentile(go_trials,50))
-                self.go_trial_q3.append(np.percentile(go_trials,75))
+                try:
+                    self.go_trial_latencies.append(sum(go_trials)/len(go_trials))
+                except ZeroDivisionError:
+                    print(f'You have a non responder: {self.subjects[-1]} on {self.dates[-1]}')
+                    self.go_trial_latencies.append('NO GO RESPONSES!')
+
+                self.go_stdev.append(np.std(go_trials))
+                self.go_sterr.append(stats.sem(go_trials))
+                try:
+                    self.go_trial_q1.append(np.percentile(go_trials,25))
+                except IndexError:
+                    print(f'You have a non-responder: {self.subjects[-1]} on {self.dates[-1]}')
+                    self.go_trial_q1.append('NO GO RESPONSES!')
+                try:
+                    self.go_trial_q2.append(np.percentile(go_trials,50))
+                except IndexError:
+                    self.go_trial_q2.append('NO GO RESPONSES!')
+                try:
+                    self.go_trial_q3.append(np.percentile(go_trials,75))
+                except IndexError:
+                    self.go_trial_q3.append('NO GO RESPONSES!')
                 self.go_correct.append(correct_gos/total_go_trials*100)
                 
                 
@@ -290,6 +310,8 @@ class Parse():
                    'Day of Stop Signal': self.paradigms,
                     'Go Trial % Correct': self.go_correct,
                     'Avg. Go Trial Latency (secs)': self.go_trial_latencies,
+                    'Go Trial STDEV': self.go_stdev,
+                    'Go Trial SEM': self.go_sterr,
                     'Go Trial Latency Q1 (secs)':self.go_trial_q1,
                     'Go Trial Latency Q2 (secs)(median)': self.go_trial_q2,
                     'Go Trial Latency Q3 (secs)': self.go_trial_q3,
@@ -582,7 +604,10 @@ class SS_Breakdown():
                         
                         self.magic_go = int(np.round(self.correct_gos[-1]*self.stop_incorrect_prob[-1]))
                         if self.magic_go == 0.0:
-                            self.get_ssrt.append(self.gts[-1][0])
+                            try:
+                                self.get_ssrt.append(self.gts[-1][0])
+                            except IndexError:
+                                self.get_ssrt.append('NO GO RESPONSES!')
                         else:
                             self.get_ssrt.append(self.gts[-1][self.magic_go-1])
                             
@@ -599,8 +624,10 @@ class SS_Breakdown():
                         if get_l == get_i:
                             get_i = 0.0
     
-                        
-                        self.final_ssrt.append(self.get_ssrt[-1]-get_i)
+                        try:
+                            self.final_ssrt.append(self.get_ssrt[-1]-get_i)
+                        except TypeError:
+                            self.final_ssrt.append('NO GO RESPONSES!')
                         
                         
             ####THIS CREATES JUST ENOUGH COLUMNS FOR EACH ANIMAL#######
