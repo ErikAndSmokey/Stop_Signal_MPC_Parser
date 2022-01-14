@@ -192,6 +192,12 @@ class Parse():
                 delay_lengths_pre = []
                 find_delays = ArrayParser(self.file, delay_lengths_pre, 'T','V')
                 find_delays.arraygrabber()
+                num_delays = 0
+                for i in delay_lengths_pre[-1]:
+                    if i != '0.000':
+                        num_delays+=1
+                    else:
+                        pass
                 #delay_lengths_pre = [float(x) for i,x in enumerate(delay_lengths_pre[-1]) if i != 0 and float(x) > 0.0] #fix if greg fixes program
                 self.delay_lengths_used.append(list(set(delay_lengths_pre[-1])))
                 
@@ -219,11 +225,11 @@ class Parse():
                 stop_latencies = []
                 find_stop_lat = ArrayParser(self.file, stop_latencies, 'Z', 'NONE')
                 find_stop_lat.endarraygrabber()
-                stop_latencies = [float(x) for i,x in enumerate(stop_latencies[-1][1:len(delay_lengths_pre)+1])] #fix if greg fixes program
+                stop_latencies = [float(x) for i,x in enumerate(stop_latencies[-1][1:num_delays+1])] #fix if greg fixes program
                 if stop_latencies.count(0.0) == 0:
                     self.stop_correct_percent.append(0)
                 else:
-                    self.stop_correct_percent.append(stop_latencies.count(0.0)/len(delay_lengths_pre)*100)
+                    self.stop_correct_percent.append(stop_latencies.count(0.0)/num_delays*100)
                 
                 #grab only the stop latencies for reaction time
                 rxn_stop_latencies = [x for i,x in enumerate(stop_latencies[:incorrect_stops])]
@@ -243,36 +249,44 @@ class Parse():
                 find_correct_gos = ArrayParser(self.file, correct_gos, 'D','E')
                 find_correct_gos.arraygrabber()
                 correct_gos = int(float(correct_gos[-1][0]))
-                go_trials = []
-                find_gos = ArrayParser(self.file, go_trials, 'X','Z')
-                find_gos.arraygrabber()
-                go_trials =[float(i) for i in go_trials[-1][1:correct_gos+1]] #Fix if greg fixes program
-                self.all_go_latencies.append(go_trials)
-                try:
-                    self.go_trial_latencies.append(sum(go_trials)/len(go_trials))
-                except ZeroDivisionError:
-                    print(f'You have a non responder: {self.subjects[-1]} on {self.dates[-1]}')
-                    self.go_trial_latencies.append('NO GO RESPONSES!')
-
-                self.go_stdev.append(np.std(go_trials))
-                self.go_sterr.append(stats.sem(go_trials))
-                try:
-                    self.go_trial_q1.append(np.percentile(go_trials,25))
-                except IndexError:
-                    print(f'You have a non-responder: {self.subjects[-1]} on {self.dates[-1]}')
-                    self.go_trial_q1.append('NO GO RESPONSES!')
-                try:
-                    self.go_trial_q2.append(np.percentile(go_trials,50))
-                except IndexError:
-                    self.go_trial_q2.append('NO GO RESPONSES!')
-                try:
-                    self.go_trial_q3.append(np.percentile(go_trials,75))
-                except IndexError:
-                    self.go_trial_q3.append('NO GO RESPONSES!')
-                try:
-                    self.go_correct.append(correct_gos/total_go_trials*100)
-                except ZeroDivisionError:
-                    self.go_correct.append('NO GO RESPONSES!')
+                if correct_gos == 0:
+                    self.all_go_latencies.append(np.nan)
+                    self.go_trial_latencies.append(np.nan)
+                    self.go_stdev.append(np.nan)
+                    self.go_sterr.append(np.nan)
+                    self.go_trial_q1.append(np.nan)
+                    self.go_trial_q2.append(np.nan)
+                    self.go_trial_q3.append(np.nan)
+                    self.go_correct.append(np.nan)
+                else:
+                    go_trials = []
+                    find_gos = ArrayParser(self.file, go_trials, 'X','Z')
+                    find_gos.arraygrabber()
+                    go_trials =[float(i) for i in go_trials[-1][1:correct_gos+1]] #Fix if greg fixes program
+                    self.all_go_latencies.append(go_trials)
+                    try:
+                        self.go_trial_latencies.append(sum(go_trials)/len(go_trials))
+                    except ZeroDivisionError:
+                        self.go_trial_latencies.append('NO GO RESPONSES!')
+                    self.go_stdev.append(np.std(go_trials))
+                    self.go_sterr.append(stats.sem(go_trials))
+                    try:
+                        self.go_trial_q1.append(np.percentile(go_trials,25))
+                    except IndexError:
+                        print(f'You have a non-responder: {self.subjects[-1]} on {self.dates[-1]}')
+                        self.go_trial_q1.append('NO GO RESPONSES!')
+                    try:
+                        self.go_trial_q2.append(np.percentile(go_trials,50))
+                    except IndexError:
+                        self.go_trial_q2.append('NO GO RESPONSES!')
+                    try:
+                        self.go_trial_q3.append(np.percentile(go_trials,75))
+                    except IndexError:
+                        self.go_trial_q3.append('NO GO RESPONSES!')
+                    try:
+                        self.go_correct.append(correct_gos/total_go_trials*100)
+                    except ZeroDivisionError:
+                        self.go_correct.append('NO GO RESPONSES!')
                 
                 
                 success_id = {'Unsx':self.stop_uts[-1], 'Sx': self.stop_sts[-1]}
@@ -379,7 +393,7 @@ class Parse():
     def gr_rxns(self):
         #Create your iterator for your going through your data and making a graph for each animal that is present
         set_subs = list(set(self.subjects))
-        x = round(np.sqrt(len(set_subs)))
+        x = round(np.sqrt(len(set_subs)))+1
         y = round(np.sqrt(len(set_subs)))
 
         #Create a dataframe for each animal that is present and explode their rxn times
@@ -403,7 +417,7 @@ class Parse():
 
     def gr_go(self):
         set_subs = list(set(self.subjects))
-        x = round(np.sqrt(len(set_subs)))
+        x = round(np.sqrt(len(set_subs)))+1
         y = round(np.sqrt(len(set_subs)))
         #Create all of the go latency violin plots!    
         fig,axes = plt.subplots(x,y, figsize = (24,36))
