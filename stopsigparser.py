@@ -393,8 +393,8 @@ class Parse():
     def gr_rxns(self):
         #Create your iterator for your going through your data and making a graph for each animal that is present
         set_subs = list(set(self.subjects))
-        x = round(np.sqrt(len(set_subs)))+1
-        y = round(np.sqrt(len(set_subs)))
+        x = int(round(np.sqrt(len(set_subs))))+1
+        y = int(round(np.sqrt(len(set_subs))))
 
         #Create a dataframe for each animal that is present and explode their rxn times
         df_rxn = self.df.explode('All Stop Rxn Times')
@@ -417,8 +417,8 @@ class Parse():
 
     def gr_go(self):
         set_subs = list(set(self.subjects))
-        x = round(np.sqrt(len(set_subs)))+1
-        y = round(np.sqrt(len(set_subs)))
+        x = int(round(np.sqrt(len(set_subs))))+1
+        y = int(round(np.sqrt(len(set_subs))))
         #Create all of the go latency violin plots!    
         fig,axes = plt.subplots(x,y, figsize = (24,36))
         df_go = self.df.explode('All Go Latencies')
