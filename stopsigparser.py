@@ -269,7 +269,10 @@ class Parse():
                     self.go_trial_q3.append(np.percentile(go_trials,75))
                 except IndexError:
                     self.go_trial_q3.append('NO GO RESPONSES!')
-                self.go_correct.append(correct_gos/total_go_trials*100)
+                try:
+                    self.go_correct.append(correct_gos/total_go_trials*100)
+                except ZeroDivisionError:
+                    self.go_correct.append('NO GO RESPONSES!')
                 
                 
                 success_id = {'Unsx':self.stop_uts[-1], 'Sx': self.stop_sts[-1]}
