@@ -456,6 +456,7 @@ class SS_Breakdown():
         self.listofcontrols = [str(i).upper() for i in self.dfgroups[self.control_name]] #Because df to df comparisons weren't working...
         self.listofexps = [str(i).upper() for i in self.dfgroups[self.experimental_name]] #Because df to df comparisons weren't working...
         self.accepted_msns = [str(i).upper().replace(' ','') for i in self.dfgroups['Acceptable MSNs']]
+        self.do_not_breakdown = [str(i).upper().replace(' ', '') for i in self.dfgroups['Do Not Parse for Test Breakdown']]
 
         #The directory where the data files are that you want to analyze
         self.path_to_data = self.file_path +'\\Data\\'
@@ -525,7 +526,7 @@ class SS_Breakdown():
                 if i in x:
                     self.file = self.path_to_data + x
                     msn_check = MainInfoParser.msngrabber(self.file)
-                    if msn_check.upper().replace(' ','') in self.accepted_msns:
+                    if msn_check.upper().replace(' ','') in self.accepted_msns and msn_check.upper().replace(' ','') not in self.do_not_breakdown:
                         main_info = MainInfoParser(self.file,self.dates,self.starttimes,self.subjects,self.msns,self.paradigms)
                         main_info.maininfograbber()
                         
